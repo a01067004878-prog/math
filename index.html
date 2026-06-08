@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>✨ 파스텔 Math Rush! ✨</title>
+<style>
+/* 아기자기한 파스텔톤 배경 */
+body {
+  margin: 0;
+  font-family: 'MapleStoryOTFBold', 'Comic Sans MS', sans-serif;
+  background: linear-gradient(135deg, #ffe5ec, #ffc2d1, #e8dbfc);
+  color: #4a4a4a;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  user-select: none;
+}
+
+/* 동글동글하고 귀여운 게임 콘테이너 */
+.game {
+  width: 360px;
+  padding: 25px;
+  border-radius: 30px;
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(10px);
+  box-shadow: 0 15px 35px rgba(255, 105, 180, 0.2);
+  border: 4px solid #fff;
+  text-align: center;
+}
+
+h1 {
+  font-size: 32px;
+  color: #ff5c8a;
+  text-shadow: 2px 2px 0px #fff, 4px 4px 0px #ffe5ec;
+  margin-bottom: 10px;
+}
+
+p {
+  font-weight: bold;
+  color: #7a7a7a;
+}
+
+.top {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 25px;
+  font-size: 20px;
+  font-weight: bold;
+}
+
+.timer {
+  color: #ff6b6b;
+  background: #ffe5e5;
+  padding: 5px 15px;
+  border-radius: 20px;
+}
+
+.score {
+  color: #ffb703;
+  background: #fff3cd;
+  padding: 5px 15px;
+  border-radius: 20px;
+}
+
+/* 대폭 커진 수학 문제 창 */
+.question {
+  background: #f7f4ff;
+  padding: 20px;
+  border-radius: 20px;
+  font-size: 40px;
+  margin: 25px 0;
+  font-weight: 900;
+  color: #6c5ce7;
+  border: 3px dashed #d6cbff;
+}
+
+.choices {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+/* 동글동글 푸딩 같은 버튼 */
+button {
+  padding: 18px;
+  font-size: 20px;
+  font-weight: bold;
+  border: none;
+  border-radius: 18px;
+  background: #fff;
+  color: #555;
+  box-shadow: 0 6px 0px #e0e0e0, 0 8px 15px rgba(0,0,0,0.05);
+  cursor: pointer;
+  transition: all 0.1s ease;
+}
+
+button:active {
+  transform: translateY(4px);
+  box-shadow: 0 2px 0px #e0e0e0, 0 4px 10px rgba(0,0,0,0.05);
+}
+
+/* 정답/오답 애니메이션 스타일 */
+.correct {
+  background: #a8e6cf !important;
+  color: #247156 !important;
+  box-shadow: 0 6px 0px #81c7ad !important;
+}
+
+.wrong {
+  background: #ffaaa5 !important;
+  color: #8c3a36 !important;
+  box-shadow: 0 6px 0px #de827c !important;
+}
+
+.bottom {
+  margin-top: 25px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  height: 35px;
+}
+
+.combo {
+  font-size: 22px;
+  font-weight: bold;
+  color: #ff477e;
+  background: #ffeaee;
+  padding: 5px 15px;
+  border-radius: 15px;
+  transition: transform 0.1s ease;
+}
+
+.bump {
+  transform: scale(1.2);
+}
+
+#feedback {
+  font-size: 24px;
+}
+
+.start-screen, .end-screen {
+  padding: 20px 0;
+}
+
+.hidden {
+  display: none;
+}
+
+/* 메인 스타트 & 다시하기 버튼 */
+.big-btn {
+  margin-top: 30px;
+  padding: 15px 40px;
+  font-size: 22px;
+  border-radius: 25px;
+  background: #ff5c8a;
+  color: white;
+  box-shadow: 0 6px 0px #d9416f;
+}
+
+.big-btn:active {
+  transform: translateY(4px);
+  box-shadow: 0 2px 0px #d9416f;
+}
+</style>
+</head>
+<body>
+
+<div class="game">
+
+  <!-- 시작 화면 -->
+  <div class="start-screen" id="startScreen">
+    <h1>🎀 Math Rush!</h1>
+    <p style="color:#9b5de5;">🔥 매운맛 두 자릿수 사칙연산 🔥</p>
+    <p>30초 동안 폭풍 계산해봐요!</p>
+    <button class="big-btn" onclick="startGame()">출발하기 🚀</button>
+  </div>
+
+  <!-- 플레이 화면 -->
+  <div class="play-screen hidden" id="playScreen">
+    <div class="top">
+      <div class="timer">⏰ <span id="time">30</span>초</div>
+      <div class="score">✨ <span id="score">0</span></div>
+    </div>
+
+    <div class="question" id="question">10 + 10</div>
+
+    <div class="choices" id="choices"></div>
+
+    <div class="bottom">
+      <div class="combo" id="comboContainer">🔥 <span id="combo">0</span> 콤보</div>
+      <div id="feedback"></div>
+    </div>
+  </div>
+
+  <!-- 종료 화면 -->
+  <div class="end-screen hidden" id="endScreen">
+    <h2>🎉 게임 끝! 🎉</h2>
+    <p style="font-size: 20px; margin: 20px 0;">최종 점수: <span id="finalScore" style="color:#ff5c8a; font-size:30px;">0</span>점</p>
+    <button class="big-btn" onclick="location.reload()">한 번 더 도전! 🔄</button>
+  </div>
+
+</div>
+
+<script>
+let score = 0;
+let time = 30;
+let combo = 0;
+let correctAnswer;
+let timer;
+let isClickable = true; // 중복 클릭 방지
+
+function startGame() {
+  document.getElementById('startScreen').classList.add('hidden');
+  document.getElementById('playScreen').classList.remove('hidden');
+  nextQuestion();
+  timer = setInterval(() => {
+    time--;
+    document.getElementById('time').textContent = time;
+    if (time <= 0) endGame();
+  }, 1000);
+}
+
+function nextQuestion() {
+  isClickable = true;
+  
+  // 난이도 상승: 10 ~ 99 사이의 두 자릿수 랜덤 생성
+  let a = Math.floor(Math.random() * 90) + 10;
+  let b = Math.floor(Math.random() * 90) + 10;
+  
+  // 사칙연산 모두 포함 (+, -, *, /)
+  let ops = ['+', '-', '*', '/'];
+  let op = ops[Math.floor(Math.random() * ops.length)];
+
+  // 나누기일 때는 정수로 떨어지기 쉽게 조금 조절 (나머지는 버림 처리)
+  if (op === '+') correctAnswer = a + b;
+  if (op === '-') correctAnswer = a - b;
+  if (op === '*') correctAnswer = a * b;
+  if (op === '/') {
+    // 0으로 나누기 방지 및 깔끔한 계산을 위해 b의 범위를 줄임
+    b = Math.floor(Math.random() * 15) + 2; 
+    correctAnswer = Math.floor(a / b);
+  }
+
+  // 나눗셈 기호 가독성 좋게 변경
+  let displayOp = op === '/' ? '÷' : (op === '*' ? '×' : op);
+  document.getElementById('question').textContent = `${a} ${displayOp} ${b}`;
+
+  // 보기 생성 (정답과 비슷한 오답 생성 메커니즘)
+  let answers = [correctAnswer];
+  while (answers.length < 4) {
+    let spread = op === '*' ? 20 : 5; // 곱셈일 땐 오답 오차 범위를 넓힘
+    let wrong = correctAnswer + Math.floor(Math.random() * (spread * 2) - spread);
+    if (!answers.includes(wrong) && wrong >= 0) { 
+      answers.push(wrong);
+    }
+  }
+
+  // 보기 셔플
+  answers.sort(() => Math.random() - 0.5);
+
+  let choicesDiv = document.getElementById('choices');
+  choicesDiv.innerHTML = '';
+
+  answers.forEach(ans => {
+    let btn = document.createElement('button');
+    btn.textContent = ans;
+    btn.onclick = () => checkAnswer(btn, ans);
+    choicesDiv.appendChild(btn);
+  });
+}
+
+function checkAnswer(button, answer) {
+  if (!isClickable) return; // 연속 클릭 방지
+  isClickable = false;
+
+  let feedback = document.getElementById('feedback');
+  let comboContainer = document.getElementById('comboContainer');
+
+  if (answer === correctAnswer) {
+    score += 10 + combo * 5; // 콤보 보너스 상향!
+    combo++;
+    button.classList.add('correct');
+    feedback.textContent = '⭐';
+    
+    // 콤보 성공 시 둥실 흔들리는 이펙트
+    comboContainer.classList.add('bump');
+    setTimeout(() => comboContainer.classList.remove('bump'), 1000);
+  } else {
+    combo = 0;
+    button.classList.add('wrong');
+    feedback.textContent = '💧';
+  }
+
+  document.getElementById('score').textContent = score;
+  document.getElementById('combo').textContent = combo;
+
+  // 다음 문제로 넘어가는 딜레이
+  setTimeout(() => {
+    nextQuestion();
+    feedback.textContent = '';
+  }, 400);
+}
+
+function endGame() {
+  clearInterval(timer);
+  document.getElementById('playScreen').classList.add('hidden');
+  document.getElementById('endScreen').classList.remove('hidden');
+  document.getElementById('finalScore').textContent = score;
+}
+</script>
+
+</body>
+</html>
